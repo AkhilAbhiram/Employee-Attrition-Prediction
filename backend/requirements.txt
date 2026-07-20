@@ -1,6 +1,31 @@
+# ============================================================
+# Employee Attrition Prediction System - Backend Requirements
+# Python 3.11 Compatible
+# ============================================================
+
+# --- Web Framework ---
 Flask==3.0.3
+flask-cors==5.0.0
+
+# --- Environment Variables ---
 python-dotenv==1.0.1
-scikit-learn==1.4.2
+
+# --- Data Science & ML ---
+numpy==1.26.4
 pandas==2.2.2
-numpy==2.0.0
-tensorflow==2.18.0
+scikit-learn==1.4.2
+joblib==1.4.2
+
+# --- Gradient Boosting ---
+lightgbm==4.3.0
+
+# --- Deep Learning (TensorFlow / Keras) ---
+tensorflow==2.16.2
+keras==3.3.3
+
+# --- Database Drivers ---
+# psycopg2-binary: PostgreSQL adapter for Supabase/Postgres connection
+psycopg2-binary==2.9.9
+
+# --- Testing ---
+pytest==8.2.2

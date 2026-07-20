@@ -1,14 +1,15 @@
-import { useState } from 'react';
+import { useContext } from "react";
+import { PredictionContext } from "../context/PredictionContext";
 
-export default function usePrediction() {
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState(null);
+/**
+ * Custom hook to easily consume prediction states and methods.
+ */
+const usePrediction = () => {
+  const context = useContext(PredictionContext);
+  if (!context) {
+    throw new Error("usePrediction must be used within a PredictionProvider");
+  }
+  return context;
+};
 
-  const predict = async (payload) => {
-    setLoading(true);
-    setResult({ message: 'Prediction pending' });
-    setLoading(false);
-  };
-
-  return { loading, result, predict };
-}
+export default usePrediction;
