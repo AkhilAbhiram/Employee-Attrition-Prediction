@@ -32,12 +32,17 @@ def insert_employee(conn, employee_dict):
     placeholders = ", ".join(["?" for _ in columns])
     columns_str = ", ".join(columns)
 
-    query = f"INSERT INTO employees ({columns_str}) VALUES ({placeholders})"
-    cursor.execute(query, values)
-    conn.commit()
-
-    # Return the row ID of the inserted employee
-    return cursor.lastrowid
+    if conn.dialect == "postgresql":
+        query = f"INSERT INTO employees ({columns_str}) VALUES ({placeholders}) RETURNING id"
+        cursor.execute(query, values)
+        employee_id = cursor.fetchone()[0]
+        conn.commit()
+        return employee_id
+    else:
+        query = f"INSERT INTO employees ({columns_str}) VALUES ({placeholders})"
+        cursor.execute(query, values)
+        conn.commit()
+        return cursor.lastrowid
 
 
 def get_employee(conn, employee_id):
