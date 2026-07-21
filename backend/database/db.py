@@ -107,7 +107,11 @@ class ConnectionWrapper:
 
 def get_database_url():
     """Return the configured database URL, preferring Supabase/Postgres when provided."""
-    return os.getenv("SUPABASE_DATABASE_URL") or os.getenv("DATABASE_URL") or DATABASE_URL
+    url = os.getenv("SUPABASE_DATABASE_URL") or os.getenv("DATABASE_URL") or DATABASE_URL
+    # Safeguard: if URL is unconfigured placeholder, ignore it to fallback to SQLite
+    if url and any(p in url for p in ["[PASSWORD]", "[PROJECT_REF]", "<PASSWORD>", "<PROJECT_REF>"]):
+        return None
+    return url
 
 
 def is_postgres_url(url):

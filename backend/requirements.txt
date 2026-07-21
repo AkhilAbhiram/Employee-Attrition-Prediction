@@ -13,7 +13,7 @@ python-dotenv==1.0.1
 # --- Data Science & ML ---
 numpy==1.26.4
 pandas==2.2.2
-scikit-learn==1.4.2
+scikit-learn==1.6.1
 joblib==1.4.2
 
 # --- Gradient Boosting ---
@@ -29,3 +29,4 @@ psycopg2-binary==2.9.9
 
 # --- Testing ---
 pytest==8.2.2
+gunicorn==22.0.0
