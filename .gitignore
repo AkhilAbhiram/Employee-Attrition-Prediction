@@ -6,8 +6,13 @@ __pycache__/
 node_modules/
 __pycache__/
 *.pyc
+# Ignore all model artifacts
 *.pkl
 *.h5
+
+# Except the deployed models
+!backend/models/*.pkl
+!backend/models/*.h5
 .env
 .DS_Store
 dist/
