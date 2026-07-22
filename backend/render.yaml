@@ -8,4 +8,8 @@ services:
     envVars:
       - key: PORT
         value: 10000
+      - key: SUPABASE_URL
+        value: https://isgyotofnsmldgqdziui.supabase.co
+      - key: SUPABASE_KEY
+        sync: false
     healthCheckPath: /health

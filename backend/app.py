@@ -1,12 +1,23 @@
 import os
+import sys
+
+# Add backend root to module search path
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from config import Config
+from services.supabase_service import (
+    supabase_client,
+    save_prediction_to_supabase,
+    fetch_history_from_supabase
+)
 
 app = Flask(__name__)
 # Enable CORS for all routes so Vercel frontend can call the Render backend API
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
-# Sample history log for session
+# Local fallback history log if Supabase table is empty or unconfigured
 prediction_history = [
     {
         "id": 1,
@@ -35,6 +46,8 @@ def index():
     return jsonify({
         "message": "Employee Attrition Prediction API",
         "status": "online",
+        "supabase_url": Config.SUPABASE_URL,
+        "supabase_connected": supabase_client is not None,
         "endpoints": {
             "health": "/health",
             "predict": "/api/predict",
@@ -45,7 +58,12 @@ def index():
 
 @app.route('/health', methods=['GET'])
 def health():
-    return jsonify({"status": "healthy", "service": "employee-attrition-backend"}), 200
+    return jsonify({
+        "status": "healthy",
+        "service": "employee-attrition-backend",
+        "supabase_url": Config.SUPABASE_URL,
+        "supabase_connected": supabase_client is not None
+    }), 200
 
 @app.route('/api/predict', methods=['POST'])
 def predict():
@@ -66,8 +84,7 @@ def predict():
         job_role = data.get('job_role', 'Software Engineer')
         employee_name = data.get('employee_name', 'Employee')
 
-        # Heuristic / ML model score calculation logic
-        # Base probability score centered around average baseline (0.16)
+        # Risk scoring calculation
         score = 0.15
         risk_factors = []
 
@@ -109,7 +126,7 @@ def predict():
         if monthly_income > 10000:
             score -= 0.10
 
-        # Bound score between 0.01 and 0.99
+        # Bound score between 0.02 and 0.98
         score = max(0.02, min(0.98, round(score, 2)))
 
         if score >= 0.60:
@@ -146,7 +163,10 @@ def predict():
             "timestamp": "Just now"
         }
 
-        # Add to session history
+        # Attempt to save to Supabase database table
+        save_prediction_to_supabase(result)
+
+        # Also store in local fallback history list
         new_history_item = dict(result)
         new_history_item["id"] = len(prediction_history) + 1
         prediction_history.insert(0, new_history_item)
@@ -179,8 +199,11 @@ def get_dashboard_metrics():
 
 @app.route('/api/history', methods=['GET'])
 def get_history():
+    supabase_data = fetch_history_from_supabase(limit=20)
+    if supabase_data and len(supabase_data) > 0:
+        return jsonify(supabase_data), 200
     return jsonify(prediction_history[:10]), 200
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
+    port = Config.PORT
     app.run(host='0.0.0.0', port=port, debug=False)
